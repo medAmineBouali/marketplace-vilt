@@ -23,7 +23,6 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
-// Calculer la note moyenne
     public function getAverageRatingAttribute()
     {
         return $this->reviews()->avg('rating') ?? 0;
