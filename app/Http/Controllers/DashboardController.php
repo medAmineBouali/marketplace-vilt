@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -24,34 +25,61 @@ class DashboardController extends Controller
     }
 
     // 2. SELLER DASHBOARD
-    // Fetches the seller's shop and their products
     public function seller()
     {
         $user = Auth::user();
+        $shop = $user->shop;
 
-        // Ensure the relationship exists in User model: public function shop() { return $this->hasOne(Shop::class); }
-        $shop = Shop::with(['products' => function($query) {
-            $query->withCount('reviews'); // Useful to see review counts on dashboard
-        }])
-            ->where('user_id', $user->id)
-            ->first();
+        if (!$shop) {
+            return Inertia::render('Seller/Dashboard', ['shop' => null, 'sales' => []]);
+        }
+
+        // Fetch Order Items related to this Shop's products
+        $sales = OrderItem::with(['order.user', 'product']) // Load Customer and Product info
+        ->whereHas('product', function ($query) use ($shop) {
+            $query->where('shop_id', $shop->id);
+        })
+            ->latest()
+            ->get();
+
+        // Calculate Stats
+        $totalRevenue = $sales->sum(fn($item) => $item->price * $item->quantity);
+        $totalSoldItems = $sales->sum('quantity');
+        $uniqueOrders = $sales->pluck('order_id')->unique()->count();
 
         return Inertia::render('Seller/Dashboard', [
-            'shop' => $shop
+            'shop' => $shop,
+            'sales' => $sales,
+            'stats' => [
+                'revenue' => $totalRevenue,
+                'sold_items' => $totalSoldItems,
+                'orders_count' => $uniqueOrders,
+            ]
         ]);
     }
 
-    // 3. ADMIN DASHBOARD
-    // Fetches global statistics
+    /// 3. ADMIN DASHBOARD
     public function admin()
     {
         return Inertia::render('Admin/Dashboard', [
+            // Global Stats
             'stats' => [
                 'total_users' => User::count(),
                 'total_shops' => Shop::count(),
                 'total_orders' => Order::count(),
                 'total_revenue' => Order::sum('total_price'),
-            ]
+            ],
+            // 5 Most Recent Orders (Platform-wide)
+            'recentOrders' => Order::with('user')
+                ->latest()
+                ->take(5)
+                ->get(),
+
+            // 5 Most Recent Shops Created
+            'recentShops' => Shop::with('seller')
+                ->latest()
+                ->take(5)
+                ->get(),
         ]);
     }
 }

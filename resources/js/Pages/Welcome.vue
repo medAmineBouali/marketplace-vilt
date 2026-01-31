@@ -155,7 +155,9 @@ const addToCart = (productId: number) => {
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     <div v-for="product in featuredProducts" :key="product.id" class="group relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-xl transition duration-300">
                         <div class="aspect-w-1 aspect-h-1 w-full overflow-hidden bg-gray-200 group-hover:opacity-90 h-64 relative">
+                            <Link :href="route('products.show', product.slug)">
                             <img :src="product.image" :alt="product.name" class="h-full w-full object-cover object-center transform group-hover:scale-105 transition duration-500">
+                            </Link>
                             <div v-if="product.stock_quantity < 5" class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
                                 Plus que {{ product.stock_quantity }} !
                             </div>
@@ -166,7 +168,7 @@ const addToCart = (productId: number) => {
                                 {{ product.category ? product.category.name : 'Général' }}
                             </p>
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 truncate">
-                                <Link href="#">
+                                <Link :href="route('products.show', product.slug)">
                                     <span aria-hidden="true" class="absolute inset-0"></span>
                                     {{ product.name }}
                                 </Link>

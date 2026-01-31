@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController; // <--- CRITICAL IMPORT
 use App\Http\Controllers\SellerProductController;
 use App\Models\Category;
@@ -23,6 +24,8 @@ Route::get('/', function () {
         'featuredProducts' => Product::with('category')->latest()->take(8)->get(),
     ]);
 })->name('home');
+
+Route::get('/p/{slug}', [ProductController::class, 'show'])->name('products.show');
 
 // --- AUTHENTICATED GROUP ---
 // Includes 'prevent-back-history' to fix the logout/back-button issue
