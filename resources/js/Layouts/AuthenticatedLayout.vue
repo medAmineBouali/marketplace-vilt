@@ -1,41 +1,43 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
+const page = usePage();
+
+// LOGIC: Determine the correct dashboard route based on User Role
+const dashboardRouteName = computed(() => {
+    const role = page.props.auth.user.role;
+    if (role === 'admin') return 'admin.dashboard';
+    if (role === 'seller') return 'seller.dashboard';
+    return 'dashboard'; // Default for customer
+});
 </script>
 
 <template>
     <div>
-        <div class="min-h-screen bg-gray-100">
-            <nav
-                class="border-b border-gray-100 bg-white"
-            >
-                <!-- Primary Navigation Menu -->
+        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+            <nav class="border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex h-16 justify-between">
                         <div class="flex">
-                            <!-- Logo -->
                             <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
+                                <Link :href="route(dashboardRouteName)">
                                     <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
+                                        class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200"
                                     />
                                 </Link>
                             </div>
 
-                            <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
+                                    :href="route(dashboardRouteName)"
+                                    :active="route().current(dashboardRouteName)"
                                 >
                                     Dashboard
                                 </NavLink>
@@ -43,14 +45,13 @@ const showingNavigationDropdown = ref(false);
                         </div>
 
                         <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Settings Dropdown -->
                             <div class="relative ms-3">
                                 <Dropdown align="right" width="48">
                                     <template #trigger>
                                         <span class="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
+                                                class="inline-flex items-center rounded-md border border-transparent bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium leading-4 text-gray-500 dark:text-gray-400 transition duration-150 ease-in-out hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
                                             >
                                                 {{ $page.props.auth.user.name }}
 
@@ -71,16 +72,10 @@ const showingNavigationDropdown = ref(false);
                                     </template>
 
                                     <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
+                                        <DropdownLink :href="route('profile.edit')">
                                             Profile
                                         </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
+                                        <DropdownLink :href="route('logout')" method="post" as="button">
                                             Log Out
                                         </DropdownLink>
                                     </template>
@@ -88,26 +83,16 @@ const showingNavigationDropdown = ref(false);
                             </div>
                         </div>
 
-                        <!-- Hamburger -->
                         <div class="-me-2 flex items-center sm:hidden">
                             <button
-                                @click="
-                                    showingNavigationDropdown =
-                                        !showingNavigationDropdown
-                                "
+                                @click="showingNavigationDropdown = !showingNavigationDropdown"
                                 class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
                             >
-                                <svg
-                                    class="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
+                                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                     <path
                                         :class="{
                                             hidden: showingNavigationDropdown,
-                                            'inline-flex':
-                                                !showingNavigationDropdown,
+                                            'inline-flex': !showingNavigationDropdown,
                                         }"
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
@@ -117,8 +102,7 @@ const showingNavigationDropdown = ref(false);
                                     <path
                                         :class="{
                                             hidden: !showingNavigationDropdown,
-                                            'inline-flex':
-                                                showingNavigationDropdown,
+                                            'inline-flex': showingNavigationDropdown,
                                         }"
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
@@ -131,7 +115,6 @@ const showingNavigationDropdown = ref(false);
                     </div>
                 </div>
 
-                <!-- Responsive Navigation Menu -->
                 <div
                     :class="{
                         block: showingNavigationDropdown,
@@ -141,21 +124,16 @@ const showingNavigationDropdown = ref(false);
                 >
                     <div class="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
+                            :href="route(dashboardRouteName)"
+                            :active="route().current(dashboardRouteName)"
                         >
                             Dashboard
                         </ResponsiveNavLink>
                     </div>
 
-                    <!-- Responsive Settings Options -->
-                    <div
-                        class="border-t border-gray-200 pb-1 pt-4"
-                    >
+                    <div class="border-t border-gray-200 pb-1 pt-4">
                         <div class="px-4">
-                            <div
-                                class="text-base font-medium text-gray-800"
-                            >
+                            <div class="text-base font-medium text-gray-800 dark:text-gray-200">
                                 {{ $page.props.auth.user.name }}
                             </div>
                             <div class="text-sm font-medium text-gray-500">
@@ -167,11 +145,7 @@ const showingNavigationDropdown = ref(false);
                             <ResponsiveNavLink :href="route('profile.edit')">
                                 Profile
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                            >
+                            <ResponsiveNavLink :href="route('logout')" method="post" as="button">
                                 Log Out
                             </ResponsiveNavLink>
                         </div>
@@ -179,17 +153,12 @@ const showingNavigationDropdown = ref(false);
                 </div>
             </nav>
 
-            <!-- Page Heading -->
-            <header
-                class="bg-white shadow"
-                v-if="$slots.header"
-            >
+            <header class="bg-white dark:bg-gray-800 shadow" v-if="$slots.header">
                 <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     <slot name="header" />
                 </div>
             </header>
 
-            <!-- Page Content -->
             <main>
                 <slot />
             </main>

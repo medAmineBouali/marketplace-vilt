@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import {Head, Link} from '@inertiajs/vue3';
 import SellerLayout from '@/Layouts/SellerLayout.vue';
 
 defineProps<{
@@ -15,6 +15,15 @@ defineProps<{
             <div class="w-full mb-1">
                 <div class="mb-4">
                     <h1 class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white">Tableau de bord Vendeur</h1>
+                </div>
+                <div class="flex justify-between items-center mb-6 px-4 pt-6">
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Mon Tableau de Bord</h1>
+                    <Link
+                        :href="route('seller.products.create')"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded shadow"
+                    >
+                        + Ajouter un produit
+                    </Link>
                 </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600">

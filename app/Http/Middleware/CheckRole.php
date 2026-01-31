@@ -13,13 +13,10 @@ class CheckRole
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // On vérifie si l'utilisateur est connecté ET s'il a le bon rôle
-        if (!$request->user() || $request->user()->role !== $role) {
-            // Si c'est une requête Inertia/AJAX, on renvoie une erreur 403
-            // Sinon on peut rediriger vers la page d'accueil
-            abort(403, "Vous n'avez pas l'autorisation d'accéder à cette page.");
+        if (!$request->user() || !in_array($request->user()->role, $roles)) {
+            abort(403);
         }
         return $next($request);
     }
