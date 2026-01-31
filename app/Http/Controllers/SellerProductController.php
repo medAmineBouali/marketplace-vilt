@@ -53,4 +53,68 @@ class SellerProductController extends Controller
 
         return redirect()->route('seller.dashboard');
     }
+    // 3. List Seller's Products
+    public function index()
+    {
+        $shop = Auth::user()->shop;
+
+        return Inertia::render('Seller/Products/Index', [
+            'products' => Product::where('shop_id', $shop->id)->latest()->get()
+        ]);
+    }
+
+    // 4. Show Edit Form
+    public function edit(Product $product)
+    {
+        // Security: Ensure the product belongs to the seller
+        if ($product->shop_id !== Auth::user()->shop->id) {
+            abort(403);
+        }
+
+        return Inertia::render('Seller/Products/Edit', [
+            'product' => $product,
+            'categories' => Category::all(),
+        ]);
+    }
+
+    // 5. Update Product
+    public function update(Request $request, Product $product)
+    {
+        if ($product->shop_id !== Auth::user()->shop->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'stock_quantity' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'image_url' => 'required|url',
+        ]);
+
+        // We update the slug if the name changed, or keep it
+        $product->update([
+            'category_id' => $validated['category_id'],
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'price' => $validated['price'],
+            'stock_quantity' => $validated['stock_quantity'],
+            'image' => $validated['image_url'],
+        ]);
+
+        return redirect()->route('seller.products.index')->with('success', 'Produit mis à jour !');
+    }
+
+    // 6. Delete Product
+    public function destroy(Product $product)
+    {
+        if ($product->shop_id !== Auth::user()->shop->id) {
+            abort(403);
+        }
+
+        $product->delete();
+
+        return redirect()->back()->with('success', 'Produit supprimé.');
+    }
 }

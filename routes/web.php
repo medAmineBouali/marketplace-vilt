@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController; // <--- CRITICAL IMPORT
 use App\Http\Controllers\SellerProductController;
@@ -16,14 +17,7 @@ use Inertia\Inertia;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'categories' => Category::inRandomOrder()->limit(6)->get(),
-        'featuredProducts' => Product::with('category')->latest()->take(8)->get(),
-    ]);
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/p/{slug}', [ProductController::class, 'show'])->name('products.show');
 
@@ -53,6 +47,17 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function () {
 
         Route::post('/seller/products', [SellerProductController::class, 'store'])
             ->name('seller.products.store');
+        // ... inside role:seller group
+
+        // Product Management Routes
+        Route::get('/seller/products', [SellerProductController::class, 'index'])->name('seller.products.index');
+        Route::get('/seller/products/create', [SellerProductController::class, 'create'])->name('seller.products.create');
+        Route::post('/seller/products', [SellerProductController::class, 'store'])->name('seller.products.store');
+
+        // NEW: Edit & Delete
+        Route::get('/seller/products/{product}/edit', [SellerProductController::class, 'edit'])->name('seller.products.edit');
+        Route::put('/seller/products/{product}', [SellerProductController::class, 'update'])->name('seller.products.update');
+        Route::delete('/seller/products/{product}', [SellerProductController::class, 'destroy'])->name('seller.products.destroy');
     });
 
     // 4. Admin Dashboard
@@ -68,6 +73,17 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function () {
     // NEW CHECKOUT ROUTE
     Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 
+    // ... inside role:seller group
+
+    // Product Management Routes
+    Route::get('/seller/products', [SellerProductController::class, 'index'])->name('seller.products.index');
+    Route::get('/seller/products/create', [SellerProductController::class, 'create'])->name('seller.products.create');
+    Route::post('/seller/products', [SellerProductController::class, 'store'])->name('seller.products.store');
+
+    // NEW: Edit & Delete
+    Route::get('/seller/products/{product}/edit', [SellerProductController::class, 'edit'])->name('seller.products.edit');
+    Route::put('/seller/products/{product}', [SellerProductController::class, 'update'])->name('seller.products.update');
+    Route::delete('/seller/products/{product}', [SellerProductController::class, 'destroy'])->name('seller.products.destroy');
 });
 
 require __DIR__.'/auth.php';
